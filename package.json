@@ -1,0 +1,22 @@
+{
+  "name": "poc-bittorrent",
+  "version": "0.1.0",
+  "description": "POC of BitTorrent extension",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/exos/poc-bittorrent.git"
+  },
+  "author": "exos <exos@kaktheplanet.xyz>",
+  "license": "GPL-2.0",
+  "dependencies": {
+    "bencode": "^2.0.1",
+    "colors": "^1.3.3",
+    "commander": "^2.20.0",
+    "debug": "^4.1.1",
+    "webtorrent": "^0.103.1"
+  }
+}
