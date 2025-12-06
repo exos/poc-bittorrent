@@ -59,7 +59,7 @@ torrent.on('wire', (wire) => {
     }
 
     wire.poc_chat_torrent.on('nickname', (nickname) => {
-        console.log(colors.green(`${nickname} is online`));
+        console.log(colors.green(`${remoteNickname} is now ${nickname} and is online`));
         remoteNickname = nickname;
         wires.push(wire);
     });
@@ -73,6 +73,7 @@ torrent.on('wire', (wire) => {
     });
 
     wire.on('destroy', () => {
+        console.log(colors.red(`${nickname} exit`));
         wires = wires.filter((w) => w !== wire);
     });
 
