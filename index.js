@@ -8,14 +8,20 @@ const packData = require('./package.json');
 
 program
     .version(packData.version)
+    .option('-p, --port <port>','Port', (x) =>  parseInt(x), 6881)
+    .option('-n, --nickname <nickname>','Set nickname')
     .usage('<torrentId> <path>')
 ;
 
 program.parse(process.argv);
 
 const [torrentId, path] = program.args;
+const { port, nickname } = program;
 
-const client = new Webtorrent();
+const client = new Webtorrent({
+    dht: false,
+    torrentPort: port,
+});
 
 const torrent = client.add(torrentId, {
     path,
@@ -33,24 +39,37 @@ torrent.on('error', (err) => {
     console.log(colors.red.underline(`Torrent error: ${err}`));
 });
 
+process.on('SIGINT', () => {
+    console.log(colors.yellow.underline('\nGracefully shutting down from SIGINT (Ctrl-C)'));
+    client.destroy(() => {
+        console.log(colors.yellow.underline('Client closed'));
+        process.exit(0);
+    });
+});
+
 let wires = [];
 
 torrent.on('wire', (wire) => {
-    let nickName = 'Unknow';
+    let remoteNickname = 'Unknow';
 
     wire.use(ChatExtension);
+
+    if (nickname) {
+        wire.poc_chat_torrent.setNick(nickname);
+    }
+
     wire.poc_chat_torrent.on('nickname', (nickname) => {
         console.log(colors.green(`${nickname} is online`));
-        nickName = nickname;
+        remoteNickname = nickname;
         wires.push(wire);
     });
 
     wire.poc_chat_torrent.on('msg', (msg) => {
-        console.log(colors.blue(`${nickName}: `) + colors.white(msg));
+        console.log(colors.blue(`${remoteNickname}: `) + colors.white(msg));
     });
 
     wire.poc_chat_torrent.on('me', (msg) => {
-        console.log(colors.blue.italic(`${nickName} ${msg}`));
+        console.log(colors.blue.italic(`${remoteNickname} ${msg}`));
     });
 
     wire.on('destroy', () => {
@@ -75,6 +94,9 @@ rl.on('line', (line) => {
                 break;
             case '/close':
                 process.exit(0);
+                break;
+            case '/nick':
+                wires.forEach((w) => w.poc_chat_torrent.setNick(msg));
                 break;
             default:
                 console.error(colors.red.underline(`Invalid command ${cmd}`));
