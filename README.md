@@ -8,6 +8,7 @@
 
     git clone https://github.com/exos/poc-bittorrent.git
     cd poc-bittorrent
+    npm install
     node index.js --help
 
 
